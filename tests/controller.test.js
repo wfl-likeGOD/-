@@ -51,7 +51,7 @@ test('菜单可以切换难度并持久化', () => {
   assert.equal(storage.get(Controller.STORAGE_DIFFICULTY), 'hard');
 });
 
-test('点击开始按钮进入游戏，点击方向键可以转向', () => {
+test('点击开始按钮进入游戏，滑动可以转向', () => {
   const controller = create();
   controller.setDifficulty('hard');
   const menu = Renderer.getLayout(375, 812, 'menu', 44);
@@ -61,8 +61,7 @@ test('点击开始按钮进入游戏，点击方向键可以转向', () => {
 
   const game = controller.getView().game;
   game.food = { x: 0, y: 0 };
-  const playing = Renderer.getLayout(375, 812, 'playing', 44);
-  assert.equal(tapRect(controller, playing, playing.dpad.up), true);
+  assert.equal(controller.swipe(0, -30), true);
   controller.update(120);
   assert.equal(game.snake[0].x, 10);
   assert.equal(game.snake[0].y, 9);
@@ -97,7 +96,7 @@ test('暂停、继续与切后台自动暂停', () => {
   const head = { ...game.snake[0] };
 
   const playing = Renderer.getLayout(375, 812, 'playing', 44);
-  assert.equal(tapRect(controller, playing, playing.dpad.center), true);
+  assert.equal(tapRect(controller, playing, playing.pause), true);
   assert.equal(controller.getScene(), 'paused');
 
   controller.update(1000);

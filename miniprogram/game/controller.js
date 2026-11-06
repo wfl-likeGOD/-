@@ -236,20 +236,7 @@
       }
 
       if (scene === SCENES.PLAYING) {
-        var pad = layout.dpad || {};
-        if (hit(pad.up, x, y)) {
-          return turn('up');
-        }
-        if (hit(pad.down, x, y)) {
-          return turn('down');
-        }
-        if (hit(pad.left, x, y)) {
-          return turn('left');
-        }
-        if (hit(pad.right, x, y)) {
-          return turn('right');
-        }
-        if (hit(pad.center, x, y)) {
+        if (hit(layout.pause, x, y)) {
           return pause();
         }
         return false;

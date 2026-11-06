@@ -230,29 +230,32 @@
     var topbarY = getTopbarY(safeTop);
     var score = { x: pad, y: topbarY, w: 104, h: 48 };
     var best = { x: score.x + score.w + 12, y: topbarY, w: 88, h: 48 };
-    var boardTopBase = topbarY + 48 + 26;
-    var button = Math.min(54, Math.floor((width - pad * 2 - 12) / 3));
-    button = Math.max(44, button);
-    var gap = 6;
-    var dpadSize = button * 3 + gap * 2;
-    var maxBoard = height - boardTopBase - dpadSize - 68;
+    var topContent = topbarY + 48 + 26;
+    var pauseGap = 44;
+    var pauseHeight = 52;
+    var hintGap = 28;
+    var hintSpace = 18;
+    var bottomMargin = 28;
+    var controlsHeight = pauseGap + pauseHeight + hintGap + hintSpace;
+    var maxBoard = height - topContent - bottomMargin - controlsHeight;
     var boardSize = Math.max(200, Math.min(width - pad * 2, 335, maxBoard));
-    var groupHeight = boardSize + 14 + dpadSize;
-    var available = height - boardTopBase - 30;
-    var offset = clamp((available - groupHeight) * 0.35, 0, 70);
-    var boardTop = boardTopBase + offset;
+    var groupHeight = boardSize + controlsHeight;
+    var available = height - topContent - bottomMargin;
+    var offset = Math.max(0, (available - groupHeight) * 0.5);
+    var boardTop = topContent + offset;
     var board = {
       x: (width - boardSize) / 2,
       y: boardTop,
       w: boardSize,
       h: boardSize
     };
-    var dpadTop = boardTop + boardSize + 14;
-    var leftX = width / 2 - button * 1.5 - gap;
-    var centerX = width / 2 - button / 2;
-    var rightX = width / 2 + button / 2 + gap;
-    var row2Y = dpadTop + button + gap;
-    var row3Y = dpadTop + (button + gap) * 2;
+    var pauseWidth = 112;
+    var pause = {
+      x: (width - pauseWidth) / 2,
+      y: boardTop + boardSize + pauseGap,
+      w: pauseWidth,
+      h: pauseHeight
+    };
     return {
       width: width,
       height: height,
@@ -263,14 +266,8 @@
       best: best,
       board: board,
       modeY: boardTop - 14,
-      dpad: {
-        up: { x: centerX, y: dpadTop, w: button, h: button },
-        left: { x: leftX, y: row2Y, w: button, h: button },
-        center: { x: centerX, y: row2Y, w: button, h: button },
-        right: { x: rightX, y: row2Y, w: button, h: button },
-        down: { x: centerX, y: row3Y, w: button, h: button }
-      },
-      hintY: dpadTop + dpadSize + 22
+      pause: pause,
+      hintY: pause.y + pause.h + hintGap
     };
   }
 
@@ -497,35 +494,18 @@
     drawSpacedText(ctx, modeText, layout.width / 2, layout.modeY, 1.2);
   }
 
-  function drawDpad(ctx, layout) {
-    var dpad = layout.dpad;
-    drawDirectionButton(ctx, dpad.up, 0);
-    drawDirectionButton(ctx, dpad.left, -Math.PI / 2);
-    drawDirectionButton(ctx, dpad.right, Math.PI / 2);
-    drawDirectionButton(ctx, dpad.down, Math.PI);
-    var center = dpad.center;
-    var cx = center.x + center.w / 2;
-    var cy = center.y + center.h / 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy, center.w * 0.34, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(12,29,33,0.9)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(120,255,196,0.13)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(160,235,203,0.8)';
-    fillRoundRect(ctx, cx - 4.5, cy - 5.5, 3, 11, 1.4, 'rgba(160,235,203,0.8)');
-    fillRoundRect(ctx, cx + 1.5, cy - 5.5, 3, 11, 1.4, 'rgba(160,235,203,0.8)');
-  }
-
-  function drawDirectionButton(ctx, rect, angle) {
-    fillRoundRect(ctx, rect.x, rect.y, rect.w, rect.h, 16, 'rgba(13,32,37,0.88)');
-    strokeRoundRect(ctx, rect.x, rect.y, rect.w, rect.h, 16, 'rgba(120,255,196,0.16)', 1);
-    ctx.save();
-    ctx.globalAlpha = 0.14;
-    fillRoundRect(ctx, rect.x + 4, rect.y + 4, rect.w - 8, 5, 2.5, '#b8ffd9');
-    ctx.restore();
-    drawChevron(ctx, rect.x + rect.w / 2, rect.y + rect.h / 2, angle, rect.w * 0.34, 'rgba(162,255,206,0.9)');
+  function drawPauseControl(ctx, rect) {
+    fillRoundRect(ctx, rect.x, rect.y, rect.w, rect.h, rect.h / 2, 'rgba(13,32,37,0.9)');
+    strokeRoundRect(ctx, rect.x, rect.y, rect.w, rect.h, rect.h / 2, 'rgba(120,255,196,0.18)', 1);
+    var cx = rect.x + rect.w / 2;
+    var cy = rect.y + rect.h / 2;
+    fillRoundRect(ctx, cx - 25, cy - 7, 4, 14, 1.6, 'rgba(190,255,220,0.92)');
+    fillRoundRect(ctx, cx - 17, cy - 7, 4, 14, 1.6, 'rgba(190,255,220,0.92)');
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = font(14, 600);
+    ctx.fillStyle = 'rgba(213,255,235,0.92)';
+    ctx.fillText('暂停', cx - 4, cy + 1);
   }
 
   function clipBoard(ctx, grid) {
@@ -915,12 +895,14 @@
     drawSnake(ctx, game.snake, game.dir, grid, time);
     drawFood(ctx, grid, game.food, time);
     ctx.restore();
-    drawDpad(ctx, layout);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.font = font(10, 500);
-    ctx.fillStyle = 'rgba(100,137,123,0.85)';
-    drawSpacedText(ctx, '滑动屏幕或点击方向键控制 · 中心键暂停', layout.width / 2, layout.hintY, 0.6);
+    if (view.scene === 'playing') {
+      drawPauseControl(ctx, layout.pause);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = font(11, 500);
+      ctx.fillStyle = 'rgba(100,137,123,0.9)';
+      ctx.fillText('滑动屏幕控制方向', layout.width / 2, layout.hintY);
+    }
   }
 
   function draw(ctx, view, width, height, time, options) {

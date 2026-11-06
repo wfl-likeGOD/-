@@ -84,19 +84,16 @@ test('小屏菜单不会溢出', () => {
   assert.ok(layout.footerY === null || layout.footerY < 568);
 });
 
-test('游戏布局中棋盘、状态卡和方向键都可用', () => {
+test('游戏布局中棋盘、状态卡和暂停按钮都可用', () => {
   const layout = Renderer.getLayout(375, 812, 'playing', 44);
   assert.ok(isInside(layout.board, 375, 812));
   assert.ok(isInside(layout.score, 375, 812));
   assert.ok(isInside(layout.best, 375, 812));
   assert.ok(layout.best.x + layout.best.w < 250, '状态卡应避开右上角胶囊按钮');
-  assert.ok(isInside(layout.dpad.up, 375, 812));
-  assert.ok(isInside(layout.dpad.left, 375, 812));
-  assert.ok(isInside(layout.dpad.center, 375, 812));
-  assert.ok(isInside(layout.dpad.right, 375, 812));
-  assert.ok(isInside(layout.dpad.down, 375, 812));
-  assert.ok(layout.dpad.up.y < layout.dpad.left.y);
-  assert.ok(layout.dpad.left.y === layout.dpad.center.y);
+  assert.ok(isInside(layout.pause, 375, 812));
+  assert.ok(layout.pause.y > layout.board.y + layout.board.h);
+  assert.ok(layout.hintY > layout.pause.y + layout.pause.h);
+  assert.equal(layout.dpad, undefined);
   assert.ok(layout.hintY < 812);
 });
 
@@ -104,14 +101,14 @@ test('小屏游戏布局不会溢出', () => {
   const layout = Renderer.getLayout(375, 667, 'playing', 44);
   assert.ok(layout.board.w >= 200);
   assert.ok(isInside(layout.board, 375, 667));
-  assert.ok(isInside(layout.dpad.down, 375, 667));
+  assert.ok(isInside(layout.pause, 375, 667));
   assert.ok(layout.hintY < 667);
 });
 
 test('320×568 的游戏布局也能完整放下', () => {
   const layout = Renderer.getLayout(320, 568, 'playing', 24);
   assert.ok(isInside(layout.board, 320, 568));
-  assert.ok(isInside(layout.dpad.down, 320, 568));
+  assert.ok(isInside(layout.pause, 320, 568));
   assert.ok(layout.hintY < 568);
   assert.ok(layout.best.x + layout.best.w < 223, '状态卡应避开右上角胶囊按钮');
 });
