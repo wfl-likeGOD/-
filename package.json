@@ -1,0 +1,13 @@
+{
+  "name": "wechat-snake-miniprogram",
+  "version": "1.0.0",
+  "private": true,
+  "description": "贪吃蛇微信小程序",
+  "scripts": {
+    "test": "node --test tests/core.test.js tests/controller.test.js tests/renderer.test.js tests/page.test.js",
+    "screenshots": "node scripts/screenshot.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
